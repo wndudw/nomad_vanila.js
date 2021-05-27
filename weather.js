@@ -1,5 +1,22 @@
+const weather = document.querySelector(".js-weather");
+
 const API_KEY = "c6694281a701668802c9420eaebfe8f9";
 const COORDS = 'coords';
+
+function getWeater(lat, lng){
+    fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${API_KEY}&units=metric`
+    )
+    .then(function(response){
+        return response.json();
+    })
+    .then(function(json){
+        console.log(json);
+        //온도의 소수점 버리기 처리
+        const temperture = Math.floor(json.main.temp);
+        const place = json.name;
+        weather.innerText = `${temperture}º @ ${place}`;
+    });
+}
 
 function saveCoords(coordsObj){
     localStorage.setItem(COORDS,JSON.stringify(coordsObj));
@@ -15,6 +32,7 @@ function handleGeoSucces(position){
         longitude: longitude
     };
     saveCoords(coordsObj);
+    getWeater(latitude,longitude);
 }
 
 function handelGeoError(){
@@ -26,11 +44,13 @@ function askForCoords(){
 }
 
 function loadCoords(){
-    const loadedCords = localStorage.getItem(COORDS);
-    if(loadedCords === null){
+    const loadedCoords = localStorage.getItem(COORDS);
+    if(loadedCoords === null){
         askForCoords();
     } else {
-        //getWeater
+        const parsedCoords = JSON.parse(loadedCoords);
+        //console.log(parsedCoords);
+        getWeater(parsedCoords.latitude, parsedCoords.longitude);
     }
 }
 
